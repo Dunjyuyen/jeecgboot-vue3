@@ -1,0 +1,40 @@
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  USERNAME: ${{ secrets.SECRETS_USERNAME }}
+  PASSWORD: ${{ secrets.SECRETS_PASSWORD }}
+  REGISTRY: registry.cn-hangzhou.aliyuncs.com
+  IMAGE: gangtec/jeecgboot-vue3
+  TAG: latest
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up vue3 1.8
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Install
+      run: yarn install
+    - name: Build
+      run: yarn run build
+
+    - uses: mr-smithers-excellent/docker-build-push@v4
+      name: Build & push Docker image
+      with:
+        image: ${{env.IMAGE}}
+        tag: latest
+        dockerfile: ./Dockerfile
+        registry: ${{ env.REGISTRY }}
+        username: ${{ env.USERNAME }}
+        password: ${{ env.PASSWORD }}
